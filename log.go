@@ -12,11 +12,11 @@ import (
 	"regexp"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"codeberg.org/rumpelsepp/helpers"
 	"github.com/coreos/go-systemd/v22/journal"
 	"github.com/google/uuid"
 )
@@ -59,6 +59,15 @@ func getLineNumber(depth int) string {
 	return ""
 }
 
+func getEnvBool(name string) bool {
+	if rawVal, ok := os.LookupEnv(name); ok {
+		if val, err := strconv.ParseBool(rawVal); val && err == nil {
+			return val
+		}
+	}
+	return false
+}
+
 type Logger struct {
 	hrFormatter *HRFormatter
 	host        string
@@ -80,15 +89,15 @@ func NewLogger(component string, w io.Writer) *Logger {
 		hrFormatter = NewHRFormatter()
 	)
 	switch strings.ToLower(os.Getenv("PENLOG_OUTPUT")) {
-	case "":
+	case "", "hr-nano":
 		outputType = OutTypeHRTiny
-		hrFormatter.TinyFormat = true
-	case "hr":
-		outputType = OutTypeHR
-		hrFormatter.TinyFormat = false
+		hrFormatter.Dialect = HRNano
 	case "hr-tiny":
-		outputType = OutTypeHRTiny
-		hrFormatter.TinyFormat = true
+		outputType = OutTypeHR
+		hrFormatter.Dialect = HRTiny
+	case "hr", "hr-full":
+		outputType = OutTypeHR
+		hrFormatter.Dialect = HRFull
 	case "json":
 		outputType = OutTypeJSON
 	case "json-pretty":
@@ -139,33 +148,22 @@ func NewLogger(component string, w io.Writer) *Logger {
 		loglevel:    loglevel,
 		component:   component,
 		timespec:    time.RFC3339Nano,
-		lines:       helpers.GetEnvBool("PENLOG_CAPTURE_LINES"),
-		stacktrace:  helpers.GetEnvBool("PENLOG_CAPTURE_STACKTRACES"),
+		lines:       getEnvBool("PENLOG_CAPTURE_LINES"),
+		stacktrace:  getEnvBool("PENLOG_CAPTURE_STACKTRACES"),
 		outputType:  outputType,
 		writer:      w,
-		includeUUID: false,
 	}
-}
-
-func (l *Logger) SetOutputType(t OutType) {
-	l.mu.Lock()
-	l.outputType = t
-	switch t {
-	case OutTypeHR:
-		l.hrFormatter.TinyFormat = false
-	case OutTypeHRTiny:
-		l.hrFormatter.TinyFormat = true
-	case OutTypeSystemdJournal:
-		if !journal.Enabled() {
-			panic("systemd-journal is not available")
-		}
-	}
-	l.mu.Unlock()
 }
 
 func (l *Logger) SetColors(enable bool) {
 	l.mu.Lock()
 	l.hrFormatter.ShowColors = enable
+	l.mu.Unlock()
+}
+
+func (l *Logger) SetIncludeUUID(enabled bool) {
+	l.mu.Lock()
+	l.includeUUID = enabled
 	l.mu.Unlock()
 }
 
@@ -190,12 +188,6 @@ func (l *Logger) SetStacktrace(enable bool) {
 func (l *Logger) SetLogLevel(prio Prio) {
 	l.mu.Lock()
 	l.loglevel = prio
-	l.mu.Unlock()
-}
-
-func (l *Logger) SetIncludeUUID(enabled bool) {
-	l.mu.Lock()
-	l.includeUUID = enabled
 	l.mu.Unlock()
 }
 
