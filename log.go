@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// Package penlog implements the penlog(7) specification.
-package penlog
+// Package penlogger implements the penlog(7) specification.
+package penlogger
 
 import (
 	"bytes"

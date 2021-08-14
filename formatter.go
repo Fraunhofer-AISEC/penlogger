@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-package penlog
+package penlogger
 
 import (
 	"fmt"
