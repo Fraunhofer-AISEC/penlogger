@@ -32,6 +32,7 @@ const (
 	PrioNotice
 	PrioInfo
 	PrioDebug
+	PrioTrace
 )
 
 type OutType int
@@ -138,6 +139,8 @@ func NewLogger(component string, w io.Writer) *Logger {
 			loglevel = PrioInfo
 		case "debug":
 			loglevel = PrioDebug
+		case "trace":
+			loglevel = PrioTrace
 		}
 	}
 
@@ -438,6 +441,14 @@ func (l *Logger) LogDebugf(format string, v ...interface{}) {
 	l.logMessagef(msgTypeMessage, PrioDebug, nil, format, v...)
 }
 
+func (l *Logger) LogTrace(v ...interface{}) {
+	l.logMessage(msgTypeMessage, PrioTrace, nil, v...)
+}
+
+func (l *Logger) LogTracef(format string, v ...interface{}) {
+	l.logMessagef(msgTypeMessage, PrioTrace, nil, format, v...)
+}
+
 func (l *Logger) LogReadTagged(tags []string, v ...interface{}) {
 	l.logMessage(msgTypeRead, PrioDebug, tags, v...)
 }
@@ -492,4 +503,12 @@ func (l *Logger) LogDebugTagged(tags []string, v ...interface{}) {
 
 func (l *Logger) LogDebugTaggedf(tags []string, format string, v ...interface{}) {
 	l.logMessagef(msgTypeMessage, PrioDebug, tags, format, v...)
+}
+
+func (l *Logger) LogTraceTagged(tags []string, v ...interface{}) {
+	l.logMessage(msgTypeMessage, PrioTrace, tags, v...)
+}
+
+func (l *Logger) LogTraceTaggedf(tags []string, format string, v ...interface{}) {
+	l.logMessagef(msgTypeMessage, PrioTrace, tags, format, v...)
 }
