@@ -124,6 +124,10 @@ func NewLogger(component string, w io.Writer) *Logger {
 		}
 	}
 
+	if getEnvBool("PENLOG_SHOW_COLORS") {
+		hrFormatter.ShowColors = true
+	}
+
 	loglevel := PrioDebug
 	if rawVal, ok := os.LookupEnv("PENLOG_LOGLEVEL"); ok {
 		switch strings.ToLower(rawVal) {
