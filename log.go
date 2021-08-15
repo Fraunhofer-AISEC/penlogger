@@ -17,7 +17,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/go-systemd/v22/journal"
 	"github.com/google/uuid"
 )
 
@@ -107,7 +106,7 @@ func NewLogger(component string, w io.Writer) *Logger {
 	default:
 		panic("invalid penlog output")
 	}
-	if outputType == OutTypeSystemdJournal && !journal.Enabled() {
+	if outputType == OutTypeSystemdJournal && !pollJournal() {
 		panic("systemd-journal is not available")
 	}
 
@@ -229,30 +228,6 @@ func convertVarsForJournal(in map[string]interface{}) map[string]string {
 		}
 	}
 	return out
-}
-
-func (l *Logger) outputJournal(msg map[string]interface{}) {
-	var (
-		data string
-		prio = -1
-		vars = convertVarsForJournal(msg)
-	)
-	if rawVal, ok := msg["priority"]; ok {
-		if val, ok := rawVal.(Prio); ok {
-			prio = int(val)
-		}
-	}
-	if prio == -1 {
-		prio = int(PrioInfo)
-	}
-	if rawData, ok := msg["data"]; ok {
-		if val, ok := rawData.(string); ok {
-			data = val
-		}
-	}
-	if err := journal.Send(data, journal.Priority(prio), vars); err != nil {
-		panic(err)
-	}
 }
 
 func (l *Logger) outputHR(msg map[string]interface{}) {
