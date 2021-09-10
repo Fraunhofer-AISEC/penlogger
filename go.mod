@@ -1,4 +1,4 @@
-module codeberg.org/rumpelsepp/penlogger
+module github.com/Fraunhofer-AISEC/penlogger
 
 go 1.16
 
