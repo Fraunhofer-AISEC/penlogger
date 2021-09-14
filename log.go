@@ -45,12 +45,7 @@ const (
 	OutTypeSystemdJournal
 )
 
-const (
-	msgTypeRead     = "read"
-	msgTypeWrite    = "write"
-	msgTypeMessage  = "message"
-	msgTypePreamble = "preamble"
-)
+const msgTypeMessage  = "message"
 
 func getLineNumber(depth int) string {
 	if _, file, line, ok := runtime.Caller(depth); ok {
@@ -373,30 +368,6 @@ func (l *Logger) Printf(format string, v ...interface{}) {
 	l.logMessagef(msgTypeMessage, PrioInfo, nil, format, v...)
 }
 
-func (l *Logger) LogPreamble(v ...interface{}) {
-	l.logMessage(msgTypePreamble, PrioNotice, nil, v...)
-}
-
-func (l *Logger) LogPreamblef(format string, v ...interface{}) {
-	l.logMessagef(msgTypePreamble, PrioNotice, nil, format, v...)
-}
-
-func (l *Logger) LogRead(v ...interface{}) {
-	l.logMessage(msgTypeRead, PrioDebug, nil, v...)
-}
-
-func (l *Logger) LogReadf(format string, v ...interface{}) {
-	l.logMessagef(msgTypeRead, PrioDebug, nil, format, v...)
-}
-
-func (l *Logger) LogWrite(v ...interface{}) {
-	l.logMessage(msgTypeWrite, PrioDebug, nil, v...)
-}
-
-func (l *Logger) LogWritef(format string, v ...interface{}) {
-	l.logMessagef(msgTypeWrite, PrioDebug, nil, format, v...)
-}
-
 func (l *Logger) LogCritical(v ...interface{}) {
 	l.logMessage(msgTypeMessage, PrioCritical, nil, v...)
 }
@@ -451,22 +422,6 @@ func (l *Logger) LogTrace(v ...interface{}) {
 
 func (l *Logger) LogTracef(format string, v ...interface{}) {
 	l.logMessagef(msgTypeMessage, PrioTrace, nil, format, v...)
-}
-
-func (l *Logger) LogReadTagged(tags []string, v ...interface{}) {
-	l.logMessage(msgTypeRead, PrioDebug, tags, v...)
-}
-
-func (l *Logger) LogReadfTagged(tags []string, format string, v ...interface{}) {
-	l.logMessagef(msgTypeRead, PrioDebug, tags, format, v...)
-}
-
-func (l *Logger) LogWriteTagged(tags []string, v ...interface{}) {
-	l.logMessage(msgTypeWrite, PrioDebug, tags, v...)
-}
-
-func (l *Logger) LogWritefTagged(tags []string, format string, v ...interface{}) {
-	l.logMessagef(msgTypeWrite, PrioDebug, tags, format, v...)
 }
 
 func (l *Logger) LogCriticalTagged(tags []string, v ...interface{}) {
